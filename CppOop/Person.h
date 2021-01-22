@@ -15,5 +15,7 @@ public:
 	Person(string name, int age) : name(name), age(age) {}
 
 	string toString();
+	void setName(string newName);
+	void speak() const;
 };
 

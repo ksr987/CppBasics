@@ -34,3 +34,15 @@ string Person::toString() {
 	ss << this->age;
 	return ss.str();
 }
+
+void Person::setName(string newName) {
+	this->name = newName;
+}
+void Person::speak() const {
+	cout << "My name is: " << this->name << endl;
+
+	//cannot perform the line below since const keyword after the method prevents changing any instance
+	//variables of the object of Person class.
+
+	//this->name = "Bob";
+}
