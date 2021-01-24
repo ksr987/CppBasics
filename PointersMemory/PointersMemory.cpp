@@ -24,6 +24,71 @@ void manipulateReferenceVariable(double& value) {
     value = 123.4;
 }
 
+Animal badCreateAnimal() {
+    //default constructor invoked
+    Animal a;
+    a.setName("Bertie");
+    //copy constructor invoked when an object is returned from a function
+    return a;
+}
+
+Animal& badCreateAnimal2() {
+    Animal a;
+    a.setName("Bertie");
+
+    //A reference variable is returned to avoid invoking the copy constructor (invoked when return type 
+    //is object). This avoid creating a duplicate variable to be returned by the method.
+    return a;
+}
+
+Animal* goodCreateAnimal() {
+    Animal* a = new Animal();
+    a->setName("Bertie");
+    return a;
+}
+
+void passArrayToFunction1(string texts[],const int nElements) {
+
+    cout << sizeof(texts) << endl; //prints 4 (size of pointer) and not (28*3). We lose the info about the
+                                   //no of elements in the array. Thus, nElements is passed as parameter.
+    for (int i = 0; i < nElements; i++) {
+        cout << texts[i] << endl;
+    } 
+}
+
+void passArrayToFunction2(string *texts, const int nElements) {
+
+    cout << sizeof(texts) << endl; //prints 4 (size of pointer) and not (28*3). We lose the info about the
+                                   //no of elements in the array. Thus, nElements is passed as parameter.
+    for (int i = 0; i < nElements; i++) {
+        cout << texts[i] << endl;
+    }
+}
+
+//without the need to pass the number of elements as param
+void passArrayToFunction3(string (&texts)[3]) {
+
+    cout << sizeof(texts) << endl; //prints 4 (size of pointer) and not (28*3). We lose the info about the
+                                   //no of elements in the array. Thus, nElements is passed as parameter.
+    for (int i = 0; i < sizeof(texts); i++) {
+        cout << texts[i] << endl;
+    }
+}
+
+//BAD FUNCTION: Never return a pointer to a local variable from a function. Dont do this!
+string* returnArrayFromFunction() {
+
+    string texts[] = { "one", "two", "three" };
+    return texts;
+}
+
+//GOOD FUNCTION: Since the string pointer is created using new operator, it will only get deallocated 
+//using the delete keyword, so it is available even outside the method scope.
+string* returnArrayFromFunction2() {
+    string *texts = new string[3];
+    return texts;
+}
+
 int main()
 {
     int age = 22;
@@ -254,8 +319,106 @@ int main()
     Animal* pCat1 = new Animal();
     pCat1->setName("Freddy");
     pCat1->speak();
+    cout << sizeof(Animal *) << endl; //prints 4 (size of a pointer is fixed for a machine-generally 4 bytes)
+
     //deallocate
     delete pCat1;
+
+    //importance of pointers
+
+    //Example 1: returning an Animal object, very inefficient since copy constructor is called multiple
+    //times.
+    
+    //copy constructor invoked
+    /*
+    Animal frog1 = badCreateAnimal();
+    frog1.speak();
+    */
+
+    //Example 2: returning a reference variable of Animal -> highly risky since trying to access a local
+    //variable which is out of scope of the main method
+
+    //trying to access variable 'a' outside the scope of badCreateAnimal2(). 
+    /*
+    Animal& frog2 = badCreateAnimal2();
+    frog2.speak();
+    */
+
+    //Example 3: use pointers- good way
+    //When returning a pointer, you only return fixed bytes of memory (4/8 bytes). Even if Animal object is
+    //really huge, we dont have to create copies of those animal objects. Can simply pass pointers pointing
+    //to them.
+    Animal* frog3 = goodCreateAnimal();
+    frog3->speak();
+    //deallocate
+    delete frog3;
+
+    //create object using new operator
+    Animal* pAnimal = new Animal();
+    cout << pAnimal << endl; //prints the memory location where pointer pAnimal resides
+
+    //create multiple Animal objects using new operator
+    Animal* pAnimalList = new Animal[10];
+    pAnimalList[5].setName("George");
+    pAnimalList[5].speak();
+
+    delete pAnimal;
+
+    //deallocation for a list of objects
+    delete[] pAnimalList;
+
+    string charToString = string(5, 'a'); //-> convert char to string. prints "aaaaa"
+
+    Animal* pAnimalExercise = new Animal[26];
+
+    char chPointer = 'a';
+    for (int i = 0; i < 26; i++) {
+        pAnimalExercise[i].setName(string(1, chPointer));
+        pAnimalExercise[i].speak();
+        chPointer++;
+    }
+
+    delete[] pAnimalExercise;
+
+    //Arrays and functions
+    string texts[] = { "apple", "orange" , "banana" };
+
+    cout << sizeof(texts) << endl; //prints 28*3=84 bytes
+    //different ways to pass arrays as a function parameter
+    passArrayToFunction1(texts, 3);
+    passArrayToFunction2(texts, 3);
+
+    //passing array without specifying the number of elements
+    passArrayToFunction3(texts);
+
+    //returning array as a function
+
+    // returnArrayFromFunction(); -> NEVER DO THIS-> Look at method for more details
+
+    string* arr = returnArrayFromFunction2(); //return string pointer instead
+    delete[] arr;
+
+
+    /*
+    Namespaces: Way to avoid conflicts between classes/global variables with same name. 2 classes with the
+    same name can exist but in different namespaces. These are useful when you want to use your own 
+    implementation of a certain method of a class, so you include the statement: 'using namespace <name>'
+    at the top of your cpp file. And when you define the class in the header file, enclose the class in a
+    namespace. 
+    */
+    
+    //example- defining
+    //namespace ksr {
+    //    class Cat {
+    //        //class implementation
+    //    public:
+    //        void speak();
+    //    };
+    //}
+
+    //using a namespace
+    //ksr::Cat c1;
+    //c1.speak();
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
